@@ -343,6 +343,7 @@
                                                         {:name       (-> c .getSimpleName symbol)
                                                          :class      (-> c .getName symbol)
                                                          :package    package
+                                                         :artifact   (some-> c .getProtectionDomain .getCodeSource .getLocation .toURI)
                                                          :super      (-> c .getSuperclass typesym)
                                                          :interfaces (map typesym (.getInterfaces c))
                                                          :javadoc    (javadoc-url class)})]
@@ -453,6 +454,13 @@
                    :annotated-arglists (mapv :annotated-arglists siblings)
                    :arglists (mapv (partial extract-arglist static?)
                                    siblings)
+                   :artifact (some-> (try (Class/forName (str class))
+                                          (catch Exception _)
+                                          (catch LinkageError _))
+                                     .getProtectionDomain
+                                     .getCodeSource
+                                     .getLocation
+                                     .toURI)
                    :javadoc (javadoc-url class member
                                          (:argtypes m*))))))))
 
